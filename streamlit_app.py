@@ -173,14 +173,16 @@ def create_feature_importance_chart(feature_importance):
 # ========================
 # Header
 st.markdown("""
-    <div style='text-align: center; padding: 2rem 0;'>
-        <h1>❤️ Heart Disease Prediction System</h1>
-        <p style='font-size: 1.2rem; color: #555;'>
-            AI-Powered Early Detection & Risk Assessment
-        </p>
-    </div>
+<div style='text-align:center; padding:2rem 0;'>
+    <h1>❤️ Heart Disease Prediction System</h1>
+    <p style='font-size:1.2rem; color:#555;'>
+        AI-Powered Early Detection & Risk Assessment
+    </p>
+    <p style='font-size:1.1rem; font-weight:bold;'>
+        by Hema Shree A
+    </p>
+</div>
 """, unsafe_allow_html=True)
-
 # Create tabs
 tab1, tab2, tab3, tab4 = st.tabs(["🔮 Prediction", "📊 Analytics", "📚 Information", "❓ FAQ"])
 
