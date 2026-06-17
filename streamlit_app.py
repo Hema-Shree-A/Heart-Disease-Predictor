@@ -32,7 +32,7 @@ st.markdown("""
         padding-top: 2rem;
     }
     .stMetric {
-        background-color: #f0f2f6;
+        background-color:#508CA4;
         padding: 1rem;
         border-radius: 0.5rem;
         border-left: 5px solid #3498db;
@@ -108,15 +108,15 @@ def categorize_risk(probability):
 def create_risk_gauge(probability):
     """Create a gauge chart for risk visualization"""
     fig = go.Figure(go.Indicator(
-        mode="gauge+number+delta",
-        value=probability * 100,
+        mode="gauge+number",
+        value=probability * 100,       
+        number={'suffix': '%'},
         title={'text': "Risk Score"},
-        domain={'x': [0, 1], 'y': [0, 1]},
         gauge={
             'axis': {'range': [0, 100]},
             'bar': {'color': "darkblue"},
             'steps': [
-                {'range': [0, 30], 'color': "#d4edda"},
+                {'range': [0, 30], 'color': "#3f804e"},
                 {'range': [30, 70], 'color': "#fff3cd"},
                 {'range': [70, 100], 'color': "#f8d7da"}
             ],
@@ -125,9 +125,7 @@ def create_risk_gauge(probability):
                 'thickness': 0.75,
                 'value': 70
             }
-        },
-        number={'suffix': '%'},
-        font={'size': 20}
+        }
     ))
     fig.update_layout(height=350)
     return fig
@@ -174,13 +172,19 @@ def create_feature_importance_chart(feature_importance):
 # Header
 st.markdown("""
 <div style='text-align:center; padding:2rem 0;'>
-    <h1>❤️ Heart Disease Prediction System</h1>
-    <p style='font-size:1.2rem; color:#555;'>
-        AI-Powered Early Detection & Risk Assessment
-    </p>
-    <p style='font-size:1.1rem; font-weight:bold;'>
-        by Hema Shree A
-    </p>
+
+<div style='font-size:3rem; font-weight:bold; color:white;'>
+❤️ Heart Disease Prediction System
+</div>
+
+<div style='font-size:1.2rem; color:#888; margin-top:10px;'>
+AI-Powered Early Detection & Risk Assessment
+</div>
+
+<div style='font-size:1.3rem; font-weight:bold; margin-top:15px;'>
+by Hema Shree A
+</div>
+
 </div>
 """, unsafe_allow_html=True)
 # Create tabs
@@ -275,7 +279,7 @@ with tab1:
         
         # Display main result in large text
         st.markdown(f"""
-            <div style='text-align: center; padding: 2rem; background-color: {color}; 
+            <div style='text-align: center; padding: 2rem; background-color: #1e293b; 
                         border-radius: 1rem; color: white; margin: 1rem 0;'>
                 <h2>{emoji} {risk_level}</h2>
                 <h3>{avg_probability*100:.1f}% Probability of Heart Disease</h3>
@@ -308,10 +312,10 @@ with tab1:
         # Risk gauge
         col_gauge = st.columns(1)[0]
         with col_gauge:
-            st.plotly_chart(create_risk_gauge(avg_probability), use_container_width=True)
+            st.plotly_chart(create_risk_gauge(avg_probability), width="stretch", config={'displayModeBar':False })
         
         # Model comparison
-        st.plotly_chart(create_comparison_chart(predictions), use_container_width=True)
+        st.plotly_chart(create_comparison_chart(predictions), width="stretch", config={'displayModeBar':False })
         
         # Recommendations
         st.subheader("💊 Recommendations")
@@ -399,7 +403,7 @@ with tab2:
             title='Performance Metrics Comparison',
             labels={'value': 'Score', 'variable': 'Metric'}
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", config={'displayModeBar':False } )
     
     # Feature importance
     st.subheader("🎯 Feature Importance (Random Forest)")
@@ -417,7 +421,7 @@ with tab2:
         'thal': 0.01
     }
     
-    st.plotly_chart(create_feature_importance_chart(feature_importance), use_container_width=True)
+    st.plotly_chart(create_feature_importance_chart(feature_importance), fig, width="stretch", config={'displayModeBar':False })
     
     # Model interpretability
     st.subheader("🔍 Model Interpretability")
