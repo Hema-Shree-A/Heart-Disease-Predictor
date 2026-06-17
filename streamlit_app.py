@@ -110,7 +110,7 @@ def create_risk_gauge(probability):
     fig = go.Figure(go.Indicator(
         mode="gauge+number+delta",
         value=probability * 100,
-        title={'text': "Risk Score"},
+        title={'text': "Risk Score", 'font': {'size': 24}}, 
         domain={'x': [0, 1], 'y': [0, 1]},
         gauge={
             'axis': {'range': [0, 100]},
@@ -126,11 +126,13 @@ def create_risk_gauge(probability):
                 'value': 70
             }
         },
-        suffix="%",
-        font={'size': 20}
+        number={
+            'suffix': "%", 
+            'font': {'size': 40}
+        }
     ))
     fig.update_layout(height=350)
-    return fig  
+    return fig
 
 
 def create_comparison_chart(predictions):
@@ -176,6 +178,7 @@ st.markdown("""
         <h1>❤️ Heart Disease Prediction System</h1>
         <p style='font-size: 1.2rem; color: #555;'>
             AI-Powered Early Detection & Risk Assessment
+            <h2 style='font-size: 1rem; color: #888;'>by Hema Shree A</h2>
         </p>
     </div>
 """, unsafe_allow_html=True)
@@ -188,7 +191,6 @@ tab1, tab2, tab3, tab4 = st.tabs(["🔮 Prediction", "📊 Analytics", "📚 Inf
 with tab1:
     st.header("Patient Information & Prediction")
     
-    # Create two columns for input
     col1, col2 = st.columns(2)
     
     patient_data = {}
@@ -233,18 +235,11 @@ with tab1:
                                                                  2: "Reversible Defect", 3: "Unknown"}[x])
     
     # Make prediction button
-    if st.button("🔮 Predict Heart Disease Risk", key="predict_btn", use_container_width=True):
-        
-        # Prepare data for prediction
+    if st.button("🔮 Predict Heart Disease Risk", key="predict_btn", width="stretch"):        
         input_df = pd.DataFrame([patient_data])
-        
-        # Ensure columns are in correct order
         input_df = input_df[feature_names]
-        
-        # Scale the features
         input_scaled = scaler.transform(input_df)
         
-        # Make predictions with all models
         predictions = {
             'Random Forest': {
                 'prediction': rf_model.predict(input_scaled)[0],
@@ -260,16 +255,10 @@ with tab1:
             }
         }
         
-        # Calculate average probability
         avg_probability = np.mean([p['probability'] for p in predictions.values()])
-        
-        # Display results
         st.success("✅ Prediction Complete!")
-        
-        # Risk categorization
         risk_level, color, emoji, description = categorize_risk(avg_probability)
         
-        # Display main result in large text
         st.markdown(f"""
             <div style='text-align: center; padding: 2rem; background-color: #1e293b; 
                         border-radius: 1rem; color: white; margin: 1rem 0;'>
@@ -279,41 +268,22 @@ with tab1:
             </div>
         """, unsafe_allow_html=True)
         
-        # Display individual model predictions
         st.subheader("📊 Model-wise Predictions")
-        
         col_pred1, col_pred2, col_pred3 = st.columns(3)
         
         for idx, (model_name, pred) in enumerate(predictions.items()):
             risk_cat, _, emoji_risk, desc = categorize_risk(pred['probability'])
-            
-            if idx == 0:
-                col = col_pred1
-            elif idx == 1:
-                col = col_pred2
-            else:
-                col = col_pred3
-            
+            col = col_pred1 if idx == 0 else col_pred2 if idx == 1 else col_pred3
             with col:
-                st.metric(
-                    label=model_name,
-                    value=f"{pred['probability']*100:.1f}%",
-                    delta=risk_cat
-                )
+                st.metric(label=model_name, value=f"{pred['probability']*100:.1f}%", delta=risk_cat)
         
-        # # Risk gauge
         st.plotly_chart(create_risk_gauge(avg_probability), width="stretch", config={'displayModeBar':False })
-        
-        # Model comparison
         st.plotly_chart(create_comparison_chart(predictions), width="stretch", config={'displayModeBar':False })
         
-        # Recommendations
         st.subheader("💊 Recommendations")
-        
         if avg_probability < 0.3:
             st.markdown("""
-                <div class='success-box'>
-                    <strong>✅ Low Risk:</strong>
+                <div class='success-box'><strong>✅ Low Risk:</strong>
                     <ul>
                         <li>Continue maintaining a healthy lifestyle</li>
                         <li>Regular exercise (150 min/week moderate intensity)</li>
@@ -322,11 +292,9 @@ with tab1:
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
-        
         elif avg_probability < 0.7:
             st.markdown("""
-                <div class='warning-box'>
-                    <strong>⚠️ Medium Risk:</strong>
+                <div class='warning-box'><strong>⚠️ Medium Risk:</strong>
                     <ul>
                         <li>Consult a cardiologist for detailed evaluation</li>
                         <li>Monitor blood pressure and cholesterol regularly</li>
@@ -337,11 +305,9 @@ with tab1:
                     </ul>
                 </div>
             """, unsafe_allow_html=True)
-        
         else:
             st.markdown("""
-                <div class='danger-box'>
-                    <strong>🚨 High Risk:</strong>
+                <div class='danger-box'><strong>🚨 High Risk:</strong>
                     <ul>
                         <li><strong>Seek medical attention immediately</strong></li>
                         <li>Schedule urgent consultation with a cardiologist</li>
@@ -352,7 +318,6 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
         
-        # Save prediction to history
         st.session_state.last_prediction = {
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'age': patient_data['age'],
@@ -366,12 +331,10 @@ with tab1:
 # ========================
 with tab2:
     st.header("📊 Model Analytics & Performance")
-    
     col1, col2 = st.columns(2)
     
     with col1:
         st.subheader("Model Performance Metrics")
-        
         metrics_data = {
             'Model': ['Random Forest', 'Logistic Regression', 'SVM'],
             'Accuracy': [0.87, 0.82, 0.85],
@@ -379,41 +342,30 @@ with tab2:
             'Recall': [0.89, 0.84, 0.87],
             'F1-Score': [0.87, 0.82, 0.85]
         }
-        
         df_metrics = pd.DataFrame(metrics_data)
-        st.dataframe(df_metrics, use_container_width=True)
+        # Fixed: Changed use_container_width=True to width="stretch"
+        st.dataframe(df_metrics, width="stretch")
     
     with col2:
         st.subheader("Model Comparison")
         fig = px.bar(
-    df_metrics,
-    x='Model',
-    y=['Accuracy', 'Precision', 'Recall'],
-    barmode='group',
-    title='Performance Metrics Comparison',
-    labels={'value': 'Score', 'variable': 'Metric'}
-    )
-    st.plotly_chart(fig, use_container_width=True)
+            df_metrics,
+            x='Model',
+            y=['Accuracy', 'Precision', 'Recall'],
+            barmode='group',
+            title='Performance Metrics Comparison',
+            labels={'value': 'Score', 'variable': 'Metric'}
+        )
+        # Fixed: Changed use_container_width=True to width="stretch"
+        st.plotly_chart(fig, width="stretch")
     
-    # Feature importance
     st.subheader("🎯 Feature Importance (Random Forest)")
-    
     feature_importance = {
-        'cp': 0.15,
-        'thalach': 0.14,
-        'oldpeak': 0.13,
-        'trestbps': 0.12,
-        'age': 0.11,
-        'chol': 0.10,
-        'ca': 0.09,
-        'exang': 0.08,
-        'slope': 0.07,
-        'thal': 0.01
+        'cp': 0.15, 'thalach': 0.14, 'oldpeak': 0.13, 'trestbps': 0.12, 'age': 0.11,
+        'chol': 0.10, 'ca': 0.09, 'exang': 0.08, 'slope': 0.07, 'thal': 0.01
     }
-    
     st.plotly_chart(create_feature_importance_chart(feature_importance), width="stretch", config={'displayModeBar':False })
     
-    # Model interpretability
     st.subheader("🔍 Model Interpretability")
     st.write("""
     **Random Forest**: Uses ensemble of decision trees for robust predictions
@@ -435,7 +387,6 @@ with tab2:
 # ========================
 with tab3:
     st.header("📚 Medical Information & Features")
-    
     col1, col2 = st.columns(2)
     
     with col1:
@@ -472,14 +423,13 @@ with tab3:
         """)
     
     st.subheader("Feature Explanations")
-    
     features_info = {
         'Age': 'Patient age in years (higher risk with age)',
         'Sex': 'Gender (1=Male, 0=Female; Males typically at higher risk)',
         'Chest Pain Type': 'Classification of chest pain (0-3 scale)',
         'Resting BP': 'Blood pressure at rest (normal: <120 mm Hg)',
         'Cholesterol': 'Serum cholesterol level (optimal: <200 mg/dl)',
-        'Fasting Blood Sugar': 'Blood sugar level after fasting >120 mg/dl',
+        'Festing Blood Sugar': 'Blood sugar level after fasting >120 mg/dl',
         'Resting ECG': 'Electrocardiogram results at rest',
         'Max Heart Rate': 'Maximum heart rate achieved during exercise',
         'Exercise Angina': 'Angina (chest pain) induced by exercise',
@@ -499,33 +449,16 @@ with tab3:
 # ========================
 with tab4:
     st.header("❓ Frequently Asked Questions")
-    
     faq_items = [
-        ("What is the accuracy of this model?", 
-         "The Random Forest model achieves 87% accuracy on the test set. However, this is a supportive tool and should not replace medical diagnosis."),
-        
-        ("How is the prediction probability calculated?",
-         "The system uses three machine learning models and takes the average probability. Each model independently analyzes the patient data using different algorithms."),
-        
-        ("What does risk level mean?",
-         "LOW (0-30%): Low probability of disease. MEDIUM (30-70%): Moderate risk, consult doctor. HIGH (70-100%): High probability, seek immediate attention."),
-        
-        ("Can this replace a doctor?",
-         "NO! This is a supportive diagnostic tool only. Always consult qualified healthcare professionals for accurate diagnosis and treatment."),
-        
-        ("Why are there different predictions?",
-         "Different algorithms make different decisions. The average provides more robust prediction. Multiple opinions help reduce bias."),
-        
-        ("How much data does the model use?",
-         "The model was trained on 1025 patient records with 14 clinical features from the Kaggle Heart Disease Dataset."),
-        
-        ("What features are most important?",
-         "Chest pain type, maximum heart rate, ST depression, resting blood pressure, and age are the most important factors."),
-        
-        ("Is my data secure?",
-         "This application processes data locally. No data is sent to external servers. However, always consult official medical institutions for sensitive health data."),
+        ("What is the accuracy of this model?", "The Random Forest model achieves 87% accuracy on the test set. However, this is a supportive tool and should not replace medical diagnosis."),
+        ("How is the prediction probability calculated?", "The system uses three machine learning models and takes the average probability. Each model independently analyzes the patient data using different algorithms."),
+        ("What does risk level mean?", "LOW (0-30%): Low probability of disease. MEDIUM (30-70%): Moderate risk, consult doctor. HIGH (70-100%): High probability, seek immediate attention."),
+        ("Can this replace a doctor?", "NO! This is a supportive diagnostic tool only. Always consult qualified healthcare professionals for accurate diagnosis and treatment."),
+        ("Why are there different predictions?", "Different algorithms make different decisions. The average provides more robust prediction. Multiple opinions help reduce bias."),
+        ("How much data does the model use?", "The model was trained on 1025 patient records with 14 clinical features from the Kaggle Heart Disease Dataset."),
+        ("What features are most important?", "Chest pain type, maximum heart rate, ST depression, resting blood pressure, and age are the most important factors."),
+        ("Is my data secure?", "This application processes data locally. No data is sent to external servers. However, always consult official medical institutions for sensitive health data."),
     ]
-    
     for question, answer in faq_items:
         with st.expander(question):
             st.write(answer)
