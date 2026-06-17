@@ -108,15 +108,15 @@ def categorize_risk(probability):
 def create_risk_gauge(probability):
     """Create a gauge chart for risk visualization"""
     fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=probability * 100,       
-        number={'suffix': '%'},
+        mode="gauge+number+delta",
+        value=probability * 100,
         title={'text': "Risk Score"},
+        domain={'x': [0, 1], 'y': [0, 1]},
         gauge={
             'axis': {'range': [0, 100]},
             'bar': {'color': "darkblue"},
             'steps': [
-                {'range': [0, 30], 'color': "#3f804e"},
+                {'range': [0, 30], 'color': "#d4edda"},
                 {'range': [30, 70], 'color': "#fff3cd"},
                 {'range': [70, 100], 'color': "#f8d7da"}
             ],
@@ -125,29 +125,30 @@ def create_risk_gauge(probability):
                 'thickness': 0.75,
                 'value': 70
             }
-        }
+        },
+        suffix="%",
+        font={'size': 20}
     ))
     fig.update_layout(height=350)
-    return fig
+    return fig  
 
 
 def create_comparison_chart(predictions):
     """Create a bar chart comparing predictions from all models"""
     models = list(predictions.keys())
-    probs = [pred['probability'] for pred in predictions.values()]
+    probs = [pred['probability'] * 100 for pred in predictions.values()]
     
     fig = px.bar(
         x=models,
         y=probs,
         labels={'x': 'Models', 'y': 'Disease Probability'},
         title='Prediction Comparison Across Models',
-        color=['#28a745' if p < 0.5 else '#dc3545' for p in probs],
-        text=[f'{p*100:.1f}%' for p in probs]
+        color=['#28a745' if p < 50 else '#dc3545' for p in probs],
+        text=[f'{p:.1f}%' for p in probs]
     )
     fig.update_traces(textposition='outside')
     fig.update_layout(height=400)
     return fig
-
 
 def create_feature_importance_chart(feature_importance):
     """Create a horizontal bar chart for feature importance"""
@@ -171,21 +172,12 @@ def create_feature_importance_chart(feature_importance):
 # ========================
 # Header
 st.markdown("""
-<div style='text-align:center; padding:2rem 0;'>
-
-<div style='font-size:3rem; font-weight:bold; color:white;'>
-❤️ Heart Disease Prediction System
-</div>
-
-<div style='font-size:1.2rem; color:#888; margin-top:10px;'>
-AI-Powered Early Detection & Risk Assessment
-</div>
-
-<div style='font-size:1.3rem; font-weight:bold; margin-top:15px;'>
-by Hema Shree A
-</div>
-
-</div>
+    <div style='text-align: center; padding: 2rem 0;'>
+        <h1>❤️ Heart Disease Prediction System</h1>
+        <p style='font-size: 1.2rem; color: #555;'>
+            AI-Powered Early Detection & Risk Assessment
+        </p>
+    </div>
 """, unsafe_allow_html=True)
 # Create tabs
 tab1, tab2, tab3, tab4 = st.tabs(["🔮 Prediction", "📊 Analytics", "📚 Information", "❓ FAQ"])
@@ -309,10 +301,8 @@ with tab1:
                     delta=risk_cat
                 )
         
-        # Risk gauge
-        col_gauge = st.columns(1)[0]
-        with col_gauge:
-            st.plotly_chart(create_risk_gauge(avg_probability), width="stretch", config={'displayModeBar':False })
+        # # Risk gauge
+        st.plotly_chart(create_risk_gauge(avg_probability), width="stretch", config={'displayModeBar':False })
         
         # Model comparison
         st.plotly_chart(create_comparison_chart(predictions), width="stretch", config={'displayModeBar':False })
@@ -396,14 +386,14 @@ with tab2:
     with col2:
         st.subheader("Model Comparison")
         fig = px.bar(
-            df_metrics,
-            x='Model',
-            y=['Accuracy', 'Precision', 'Recall'],
-            barmode='group',
-            title='Performance Metrics Comparison',
-            labels={'value': 'Score', 'variable': 'Metric'}
-        )
-        st.plotly_chart(fig, width="stretch", config={'displayModeBar':False } )
+    df_metrics,
+    x='Model',
+    y=['Accuracy', 'Precision', 'Recall'],
+    barmode='group',
+    title='Performance Metrics Comparison',
+    labels={'value': 'Score', 'variable': 'Metric'}
+    )
+    st.plotly_chart(fig, use_container_width=True)
     
     # Feature importance
     st.subheader("🎯 Feature Importance (Random Forest)")
@@ -421,7 +411,7 @@ with tab2:
         'thal': 0.01
     }
     
-    st.plotly_chart(create_feature_importance_chart(feature_importance), fig, width="stretch", config={'displayModeBar':False })
+    st.plotly_chart(create_feature_importance_chart(feature_importance), width="stretch", config={'displayModeBar':False })
     
     # Model interpretability
     st.subheader("🔍 Model Interpretability")
