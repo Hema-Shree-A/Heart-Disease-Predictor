@@ -1,6 +1,5 @@
 """
 HEART DISEASE PREDICTION - DATA PREPROCESSING MODULE
-=====================================
 This script handles:
 1. Data loading
 2. Exploratory Data Analysis (EDA)
